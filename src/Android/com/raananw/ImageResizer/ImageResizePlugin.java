@@ -106,28 +106,30 @@ public class ImageResizePlugin extends CordovaPlugin {
         }
         
         protected void storeImage(JSONObject params, String format, Bitmap bmp, CallbackContext callbackContext) throws JSONException, IOException, URISyntaxException {
-            int quality = params.getInt("quality");
-            String filename = params.getString("filename");
-            URI folderUri = new URI(params.getString("directory"));
-            URI pictureUri = new URI(params.getString("directory") + "/" + filename);
-            File folder = new File(folderUri);
-            folder.mkdirs();
-            File file = new File(pictureUri);
-            OutputStream outStream = new FileOutputStream(file);
-            if (format.equals(FORMAT_PNG)) {
-                bmp.compress(Bitmap.CompressFormat.PNG, quality,
-                        outStream);
-            } else {
-                bmp.compress(Bitmap.CompressFormat.JPEG, quality,
-                        outStream);
+            try {
+                int quality = params.getInt("quality");
+                String filename = params.getString("filename");
+                URI folderUri = new URI(params.getString("directory"));
+                URI pictureUri = new URI(params.getString("directory") + "/" + filename);
+                File folder = new File(folderUri);
+                folder.mkdirs();
+                File file = new File(pictureUri);
+                OutputStream outStream = new FileOutputStream(file);
+                if (format.equals(FORMAT_PNG)) {
+                    bmp.compress(Bitmap.CompressFormat.PNG, quality, outStream);
+                } else {
+                    bmp.compress(Bitmap.CompressFormat.JPEG, quality, outStream);
+                }
+                outStream.flush();
+                outStream.close();
+                JSONObject res = new JSONObject();
+                res.put("filename", filename);
+                res.put("width", bmp.getWidth());
+                res.put("height", bmp.getHeight());
+                callbackContext.success(res);
+            } catch (IOException e) {
+                callbackContext.error(e.getMessage());
             }
-            outStream.flush();
-            outStream.close();
-            JSONObject res = new JSONObject();
-            res.put("filename", filename);
-            res.put("width", bmp.getWidth());
-            res.put("height", bmp.getHeight());
-            callbackContext.success(res);
         }
     }
     
